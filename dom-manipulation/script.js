@@ -7,24 +7,31 @@ function saveQuotes() {
 }
 
 
-function fetchQuotesFromServer() {
-  fetch(API_URL)
-    .then(res => res.json())
-    .then(data => {
-      const serverQuotes = data.slice(0, 5).map(item => ({
-        text: item.title,
-        category: 'server',
-        id: item.id
-      }));
+function loadQuotes() {
+  const stored = localStorage.getItem('quotes');
+  quotes = stored ? JSON.parse(stored) : [];
+}
 
-      resolveConflicts(serverQuotes);
-    })
-    .catch(err => console.error('Failed to fetch server quotes:', err));
+
+async function fetchQuotesFromServer() {
+  try {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    const serverQuotes = data.slice(0, 5).map(item => ({
+      text: item.title,
+      category: 'server',
+      id: item.id
+    }));
+
+    resolveConflicts(serverQuotes);
+  } catch (err) {
+    console.error('Fetch failed:', err);
+  }
 }
 
 
 function resolveConflicts(serverQuotes) {
-  const merged = serverQuotes.slice();
+  const merged = [...serverQuotes];
 
   quotes.forEach(local => {
     if (!serverQuotes.some(server => server.text === local.text)) {
@@ -53,25 +60,11 @@ function clearNotification() {
 }
 
 
-function loadQuotes() {
-  const stored = localStorage.getItem('quotes');
-  quotes = stored ? JSON.parse(stored) : [];
-}
-
-
-function showRandomQuote() {
-  if (quotes.length === 0) return;
-  const quote = quotes[Math.floor(Math.random() * quotes.length)];
-  document.getElementById('quoteDisplay').innerHTML =
-    `<blockquote>${quote.text}</blockquote><p><em>${quote.category}</em></p>`;
-}
-
-
 function addQuote() {
   const text = document.getElementById('newQuoteText').value.trim();
   const category = document.getElementById('newQuoteCategory').value.trim();
 
-  if (!text || !category) return alert('Please enter both quote and category.');
+  if (!text || !category) return alert('Please enter both fields.');
 
   quotes.push({ text, category });
   saveQuotes();
@@ -113,12 +106,20 @@ function filterQuotes() {
 }
 
 
-function init() {
+function showRandomQuote() {
+  if (quotes.length === 0) return;
+  const quote = quotes[Math.floor(Math.random() * quotes.length)];
+  document.getElementById('quoteDisplay').innerHTML =
+    `<blockquote>${quote.text}</blockquote><p><em>${quote.category}</em></p>`;
+}
+
+
+async function init() {
   loadQuotes();
   populateCategories();
   filterQuotes();
-  fetchQuotesFromServer(); 
-  setInterval(fetchQuotesFromServer, 300000); 
+  await fetchQuotesFromServer();
+  setInterval(fetchQuotesFromServer, 300000);
 }
 
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
