@@ -1,88 +1,63 @@
-
-let quotes = [
-  { text: "Life is what happens when you're busy making other plans.", category: "Life" },
-  { text: "Success usually comes to those who are too busy to be looking for it.", category: "Success" },
-  { text: "The only limit to our realization of tomorrow is our doubts of today.", category: "Motivation" }
+const quotes = [
+  { text: "The only limit to our realization of tomorrow is our doubts of today.", category: "Motivation" },
+  { text: "Creativity is intelligence having fun.", category: "Inspiration" },
+  { text: "Be yourself; everyone else is already taken.", category: "Wisdom" }
 ];
 
-
 const quoteDisplay = document.getElementById("quoteDisplay");
-const newQuoteButton = document.getElementById("newQuote");
 const categorySelect = document.getElementById("categorySelect");
+const formContainer = document.getElementById("formContainer");
+const newQuoteBtn = document.getElementById("newQuote");
 
 
 function showRandomQuote() {
   const selectedCategory = categorySelect.value;
-  const filteredQuotes = selectedCategory === "all"
-    ? quotes
-    : quotes.filter(q => q.category === selectedCategory);
-
+  const filteredQuotes = quotes.filter(q => q.category === selectedCategory);
   if (filteredQuotes.length === 0) {
-    quoteDisplay.innerText = "No quotes available in this category.";
+    quoteDisplay.innerHTML = "<p>No quotes found in this category.</p>";
     return;
   }
-
   const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
   const quote = filteredQuotes[randomIndex];
+  quoteDisplay.innerHTML = `<p>"${quote.text}" — <em>${quote.category}</em></p>`;
+}
 
-  quoteDisplay.innerText = `"${quote.text}" — ${quote.category}`;
+
+function updateCategorySelect() {
+  const categories = [...new Set(quotes.map(q => q.category))];
+  categorySelect.innerHTML = categories.map(
+    cat => `<option value="${cat}">${cat}</option>`
+  ).join('');
 }
 
 
 function createAddQuoteForm() {
-  const formContainer = document.getElementById("addQuoteForm");
-
-  const quoteInput = document.createElement("input");
-  quoteInput.id = "newQuoteText";
-  quoteInput.type = "text";
-  quoteInput.placeholder = "Enter a new quote";
-
-  const categoryInput = document.createElement("input");
-  categoryInput.id = "newQuoteCategory";
-  categoryInput.type = "text";
-  categoryInput.placeholder = "Enter quote category";
-
-  const addButton = document.createElement("button");
-  addButton.innerText = "Add Quote";
-  addButton.onclick = addQuote;
-
-  formContainer.appendChild(quoteInput);
-  formContainer.appendChild(categoryInput);
-  formContainer.appendChild(addButton);
+  formContainer.innerHTML = `
+    <h2>Add a New Quote</h2>
+    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
+    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
+    <button onclick="addQuote()">Add Quote</button>
+  `;
 }
 
 
 function addQuote() {
   const quoteText = document.getElementById("newQuoteText").value.trim();
-  const quoteCategory = document.getElementById("newQuoteCategory").value.trim();
+  const category = document.getElementById("newQuoteCategory").value.trim();
 
-  if (!quoteText || !quoteCategory) {
+  if (!quoteText || !category) {
     alert("Please enter both quote and category.");
     return;
   }
 
-  const newQuote = { text: quoteText, category: quoteCategory };
-  quotes.push(newQuote);
-
-  
-  const categoryExists = Array.from(categorySelect.options).some(
-    option => option.value.toLowerCase() === quoteCategory.toLowerCase()
-  );
-  if (!categoryExists) {
-    const option = document.createElement("option");
-    option.value = quoteCategory;
-    option.textContent = quoteCategory;
-    categorySelect.appendChild(option);
-  }
-
+  quotes.push({ text: quoteText, category });
   document.getElementById("newQuoteText").value = "";
   document.getElementById("newQuoteCategory").value = "";
+  updateCategorySelect();
   alert("Quote added successfully!");
 }
 
 
-document.addEventListener("DOMContentLoaded", () => {
-  createAddQuoteForm();
-  showRandomQuote();
-  newQuoteButton.addEventListener("click", showRandomQuote);
-});
+createAddQuoteForm();
+updateCategorySelect();
+newQuoteBtn.addEventListener("click", showRandomQuote);
