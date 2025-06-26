@@ -2,28 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dynamic Quote Generator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 2rem;
-      background-color: #f4f4f4;
+      padding: 30px;
+      background-color: #f0f0f0;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
     }
     #quoteDisplay {
-      margin: 1rem 0;
-      padding: 1rem;
-      background: #fff;
-      border-left: 4px solid #007BFF;
-      font-style: italic;
-    }
-    label, select, input, button {
-      margin: 0.5rem 0;
-      padding: 0.5rem;
-      font-size: 1rem;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      font-size: 18px;
+      margin-bottom: 20px;
     }
     .form-group {
-      margin-bottom: 1rem;
+      margin-bottom: 10px;
+    }
+    input, button, select {
+      padding: 10px;
+      margin: 5px;
     }
   </style>
 </head>
@@ -31,20 +34,17 @@
 
   <h1>Dynamic Quote Generator</h1>
 
-  <div class="form-group">
-    <label for="categorySelect">Select Category:</label>
-    <select id="categorySelect"></select>
+  <div>
+    <select id="categorySelect">
+      <option value="all">All Categories</option>
+    </select>
     <button id="newQuote">Show New Quote</button>
   </div>
 
-  <div id="quoteDisplay">Choose a category and click "Show New Quote".</div>
+  <div id="quoteDisplay"></div>
 
-  <h2>Add New Quote</h2>
-  <div class="form-group">
-    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
-    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-    <button onclick="addQuote()">Add Quote</button>
-  </div>
+  <h2>Add a New Quote</h2>
+  <div id="addQuoteForm"></div>
 
   <script src="script.js"></script>
 </body>
