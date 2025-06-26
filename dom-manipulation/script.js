@@ -21,6 +21,8 @@ async function fetchQuotesFromServer() {
     }));
 
     resolveConflicts(serverQuotes);
+    console.log("Quotes synced with server!");
+    showSyncMessage("Quotes synced with server!");
   } catch (err) {
     console.error('Fetch failed:', err);
   }
@@ -50,7 +52,21 @@ function syncQuotes() {
 
 function showNotification() {
   const note = document.getElementById('notification');
-  if (note) note.style.display = 'block';
+  if (note) {
+    note.textContent = "Quotes updated with server!";
+    note.style.display = 'block';
+  }
+}
+
+function showSyncMessage(message) {
+  const note = document.getElementById('notification');
+  if (note) {
+    note.textContent = message;
+    note.style.display = 'block';
+    setTimeout(() => {
+      note.style.display = 'none';
+    }, 3000);
+  }
 }
 
 function clearNotification() {
