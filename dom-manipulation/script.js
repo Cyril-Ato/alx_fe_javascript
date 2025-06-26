@@ -1,40 +1,39 @@
 const API_URL = 'https://jsonplaceholder.typicode.com/posts';
 let quotes = [];
-let lastServerData = [];
+
 
 function saveQuotes() {
   localStorage.setItem('quotes', JSON.stringify(quotes));
 }
 
-async function fetchServerQuotes() {
-  try {
-    const res = await fetch(API_URL);
-    const data = await res.json();
-    const serverData = data.slice(0, 5).map(item => ({
-      text: item.title,
-      category: 'server',
-      id: item.id
-    }));
-    
-    resolveConflicts(serverData);
-  } catch (err) {
-    console.error('Server fetch failed:', err);
-  }
+
+function fetchQuotesFromServer() {
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(data => {
+      const serverQuotes = data.slice(0, 5).map(item => ({
+        text: item.title,
+        category: 'server',
+        id: item.id
+      }));
+
+      resolveConflicts(serverQuotes);
+    })
+    .catch(err => console.error('Failed to fetch server quotes:', err));
 }
 
-function resolveConflicts(serverData) {
-  const merged = serverData.slice(); 
+
+function resolveConflicts(serverQuotes) {
+  const merged = serverQuotes.slice();
 
   quotes.forEach(local => {
-    if (!serverData.some(s => s.text === local.text)) {
+    if (!serverQuotes.some(server => server.text === local.text)) {
       merged.push(local);
     }
   });
 
-  const changes = JSON.stringify(merged) !== JSON.stringify(quotes);
-  quotes = merged;
-
-  if (changes) {
+  if (JSON.stringify(merged) !== JSON.stringify(quotes)) {
+    quotes = merged;
     saveQuotes();
     populateCategories();
     filterQuotes();
@@ -42,47 +41,84 @@ function resolveConflicts(serverData) {
   }
 }
 
+
 function showNotification() {
-  document.getElementById('notification').style.display = 'block';
+  const note = document.getElementById('notification');
+  if (note) note.style.display = 'block';
 }
 
 function clearNotification() {
-  document.getElementById('notification').style.display = 'none';
+  const note = document.getElementById('notification');
+  if (note) note.style.display = 'none';
 }
+
 
 function loadQuotes() {
   const stored = localStorage.getItem('quotes');
   quotes = stored ? JSON.parse(stored) : [];
 }
 
-function displayQuotes(list) {
-  
-}
 
 function showRandomQuote() {
- 
+  if (quotes.length === 0) return;
+  const quote = quotes[Math.floor(Math.random() * quotes.length)];
+  document.getElementById('quoteDisplay').innerHTML =
+    `<blockquote>${quote.text}</blockquote><p><em>${quote.category}</em></p>`;
 }
+
 
 function addQuote() {
-  
-}
+  const text = document.getElementById('newQuoteText').value.trim();
+  const category = document.getElementById('newQuoteCategory').value.trim();
 
-function populateCategories() {
-  
-}
+  if (!text || !category) return alert('Please enter both quote and category.');
 
-function filterQuotes() {
-  
-}
-
-async function init() {
-  loadQuotes();
+  quotes.push({ text, category });
+  saveQuotes();
   populateCategories();
   filterQuotes();
 
-  await fetchServerQuotes();  
+  document.getElementById('newQuoteText').value = '';
+  document.getElementById('newQuoteCategory').value = '';
+}
 
-  setInterval(fetchServerQuotes, 300000); 
+// Populate dropdown with categories
+function populateCategories() {
+  const select = document.getElementById('categoryFilter');
+  if (!select) return;
+
+  const categories = [...new Set(quotes.map(q => q.category))];
+  select.innerHTML = '<option value="all">All Categories</option>';
+  categories.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    select.appendChild(opt);
+  });
+
+  const savedFilter = localStorage.getItem('selectedCategory') || 'all';
+  select.value = savedFilter;
+}
+
+// Filter quotes by category
+function filterQuotes() {
+  const filter = document.getElementById('categoryFilter').value;
+  localStorage.setItem('selectedCategory', filter);
+  const filtered = filter === 'all' ? quotes : quotes.filter(q => q.category === filter);
+
+  const display = document.getElementById('quoteDisplay');
+  display.innerHTML = filtered.length
+    ? filtered.map(q => `<blockquote>${q.text}</blockquote><p><em>${q.category}</em></p>`).join('<hr>')
+    : '<p>No quotes available.</p>';
+}
+
+// Initialization
+function init() {
+  loadQuotes();
+  populateCategories();
+  filterQuotes();
+  fetchQuotesFromServer(); // Initial fetch
+  setInterval(fetchQuotesFromServer, 300000); // Repeat every 5 min
 }
 
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
