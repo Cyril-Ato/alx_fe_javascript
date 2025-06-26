@@ -1,17 +1,14 @@
 const API_URL = 'https://jsonplaceholder.typicode.com/posts';
 let quotes = [];
 
-
 function saveQuotes() {
   localStorage.setItem('quotes', JSON.stringify(quotes));
 }
-
 
 function loadQuotes() {
   const stored = localStorage.getItem('quotes');
   quotes = stored ? JSON.parse(stored) : [];
 }
-
 
 async function fetchQuotesFromServer() {
   try {
@@ -28,7 +25,6 @@ async function fetchQuotesFromServer() {
     console.error('Fetch failed:', err);
   }
 }
-
 
 function resolveConflicts(serverQuotes) {
   const merged = [...serverQuotes];
@@ -48,7 +44,6 @@ function resolveConflicts(serverQuotes) {
   }
 }
 
-
 function showNotification() {
   const note = document.getElementById('notification');
   if (note) note.style.display = 'block';
@@ -59,6 +54,22 @@ function clearNotification() {
   if (note) note.style.display = 'none';
 }
 
+async function postQuoteToServer(quote) {
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(quote)
+    });
+
+    const result = await res.json();
+    console.log('Quote posted to server:', result);
+  } catch (err) {
+    console.error('Failed to post quote:', err);
+  }
+}
 
 function addQuote() {
   const text = document.getElementById('newQuoteText').value.trim();
@@ -66,15 +77,16 @@ function addQuote() {
 
   if (!text || !category) return alert('Please enter both fields.');
 
-  quotes.push({ text, category });
+  const newQuote = { text, category };
+  quotes.push(newQuote);
   saveQuotes();
   populateCategories();
   filterQuotes();
+  postQuoteToServer(newQuote); 
 
   document.getElementById('newQuoteText').value = '';
   document.getElementById('newQuoteCategory').value = '';
 }
-
 
 function populateCategories() {
   const select = document.getElementById('categoryFilter');
@@ -93,7 +105,6 @@ function populateCategories() {
   select.value = savedFilter;
 }
 
-
 function filterQuotes() {
   const filter = document.getElementById('categoryFilter').value;
   localStorage.setItem('selectedCategory', filter);
@@ -105,14 +116,12 @@ function filterQuotes() {
     : '<p>No quotes available.</p>';
 }
 
-
 function showRandomQuote() {
   if (quotes.length === 0) return;
   const quote = quotes[Math.floor(Math.random() * quotes.length)];
   document.getElementById('quoteDisplay').innerHTML =
     `<blockquote>${quote.text}</blockquote><p><em>${quote.category}</em></p>`;
 }
-
 
 async function init() {
   loadQuotes();
