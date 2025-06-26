@@ -44,6 +44,10 @@ function resolveConflicts(serverQuotes) {
   }
 }
 
+function syncQuotes() {
+  fetchQuotesFromServer(); 
+}
+
 function showNotification() {
   const note = document.getElementById('notification');
   if (note) note.style.display = 'block';
@@ -82,7 +86,7 @@ function addQuote() {
   saveQuotes();
   populateCategories();
   filterQuotes();
-  postQuoteToServer(newQuote); 
+  postQuoteToServer(newQuote);
 
   document.getElementById('newQuoteText').value = '';
   document.getElementById('newQuoteCategory').value = '';
@@ -127,8 +131,8 @@ async function init() {
   loadQuotes();
   populateCategories();
   filterQuotes();
-  await fetchQuotesFromServer();
-  setInterval(fetchQuotesFromServer, 300000);
+  await syncQuotes(); 
+  setInterval(syncQuotes, 300000); 
 }
 
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
