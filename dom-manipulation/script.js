@@ -82,7 +82,7 @@ function addQuote() {
   document.getElementById('newQuoteCategory').value = '';
 }
 
-// Populate dropdown with categories
+
 function populateCategories() {
   const select = document.getElementById('categoryFilter');
   if (!select) return;
@@ -100,7 +100,7 @@ function populateCategories() {
   select.value = savedFilter;
 }
 
-// Filter quotes by category
+
 function filterQuotes() {
   const filter = document.getElementById('categoryFilter').value;
   localStorage.setItem('selectedCategory', filter);
@@ -112,13 +112,13 @@ function filterQuotes() {
     : '<p>No quotes available.</p>';
 }
 
-// Initialization
+
 function init() {
   loadQuotes();
   populateCategories();
   filterQuotes();
-  fetchQuotesFromServer(); // Initial fetch
-  setInterval(fetchQuotesFromServer, 300000); // Repeat every 5 min
+  fetchQuotesFromServer(); 
+  setInterval(fetchQuotesFromServer, 300000); 
 }
 
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
